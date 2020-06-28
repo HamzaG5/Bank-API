@@ -2,12 +2,9 @@ package io.swagger.api;
 
 import io.swagger.configuration.JwtTokenUtil;
 import io.swagger.dao.UserRepository;
-import io.swagger.model.Body1;
-import io.swagger.model.InlineResponse2002;
+import io.swagger.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
-import io.swagger.model.JwtResponse;
-import io.swagger.model.User;
 import io.swagger.service.JwtUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +41,8 @@ public class LoginApiController implements LoginApi {
     @Autowired
     private JwtUserDetailsService userDetailsService;
 
+    private JwtUserDetails jwtUserDetails;
+
     private UserRepository userRepository;
 
     private static final Logger log = LoggerFactory.getLogger(LoginApiController.class);
@@ -61,23 +60,14 @@ public class LoginApiController implements LoginApi {
 
     public ResponseEntity<InlineResponse2002> loginUser(@ApiParam(value = ""  )  @Valid @RequestBody Body1 body
 )   {
-        //authenticate(authenticationRequest.getUsername(),
         body.getPassword();
         User user =userRepository.findUserByUsername(body.getUsername());
 
-        final UserDetails userDetails =
-                userDetailsService.loadUserByUsername(body.getUsername(), body.getPassword());
-
-
-        //JwtUserDetails userDetails = new JwtUserDetails();
-        //userDetails.setUsername(authenticationRequest.getUsername());
-
+        final JwtUserDetails userDetails = userDetailsService.loadUserByUsername(body.getUsername(), body.getPassword());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
-//        final String finalToken = new JwtResponse(token);
         InlineResponse2002 response2002 = new InlineResponse2002(user.getUserId().toString(),"Bearer",token);
         return new ResponseEntity<InlineResponse2002>(response2002,HttpStatus.OK);
-//        return ResponseEntity.ok(new JwtResponse(token));
     }
 
     private void authenticate(String username, String password) throws Exception {

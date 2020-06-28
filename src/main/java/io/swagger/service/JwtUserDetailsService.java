@@ -1,6 +1,7 @@
 package io.swagger.service;
 
 import io.swagger.dao.UserRepository;
+import io.swagger.model.JwtUserDetails;
 import io.swagger.model.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
@@ -18,31 +20,34 @@ public class JwtUserDetailsService implements UserDetailsService {
     {
         this.userRepository = userRepository;
     }
+    private static final Logger LOGGER = Logger.getLogger(JwtUserDetailsService.class.getName());
+
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
+    public JwtUserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
         User user1 = userRepository.findUserByUsername(username);
 
         if (user1.getUsername().equals(username))
         {
-            return new org.springframework.security.core.userdetails.User(user1.getUsername(), user1.getPassword(),
-                    new ArrayList<>());
+            return new JwtUserDetails(user1);
         } else {
+            LOGGER.warning("User not found with username: " + username);
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
     }
 
 
-    public UserDetails loadUserByUsername(String username, String password) {
+    //to get a user and put it in for userdetailsservice after checking username and password and comparing it with the repository
+    public JwtUserDetails loadUserByUsername(String username, String password) {
         User user = userRepository.findUserByUsername(username);
 
         if (user.getUsername().equals(username) && user.getPassword().equals(password))
         {
-            return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-                    new ArrayList<>());
+            return new JwtUserDetails(user);
         } else {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            LOGGER.warning("User not found with username: " + username);
+            throw new UsernameNotFoundException("Username and password combination not found" + username);
         }
     }
 }

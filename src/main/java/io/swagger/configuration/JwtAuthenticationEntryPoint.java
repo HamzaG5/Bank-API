@@ -12,11 +12,13 @@ import java.io.Serializable;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable
 {
+
+    //provides an entry point for the requests made
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException
     {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,         "Unauthorized");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Unauthorized");
     }
 }
